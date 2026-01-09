@@ -115,9 +115,9 @@ def get_total_score() :
 
 def get_judge_thresholds(mode: str):
     if mode == 'e':
-        return 120, 70   # best, good
+        return 120, 80   # best, good
     else:  # 'h'
-        return 150, 100
+        return 150, 110
 
 def judge_mandu():
     get_total_score()
@@ -141,7 +141,7 @@ def judge_mandu():
         print(art.judge_msg_box.format('너무 맛있습니다!!!❤️❤️❤️❤️❤️❤️❤️❤️❤️'))
     elif good <= user_info['total_score'] < best:
         print(art.judge_face2)
-        print(art.judge_msg_box.format('음… 나쁘진 않은데요. (씹다가 현타)'))
+        print(art.judge_msg_box.format('음… 나쁘진 않은데요.'))
     else:
         print(art.judge_face3)
         print(art.judge_msg_box.format("제 인생 최악의 만두입니다. 으어어어어얽."))
