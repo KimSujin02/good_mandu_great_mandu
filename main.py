@@ -113,32 +113,39 @@ def get_total_score() :
     user_info['total_score'] += user_info['step_3_score']
     user_info['total_score'] += user_info['step_4_score']
 
-def judge_mandu() :
+def get_judge_thresholds(mode: str):
+    if mode == 'e':
+        return 120, 70   # best, good
+    else:  # 'h'
+        return 150, 100
+
+def judge_mandu():
     get_total_score()
     time.sleep(1)
-    
+
+    best, good = get_judge_thresholds(mode)
+
     print(art.judge_face1)
     print(art.judge_msg_box.format(f'안녕하세요 심사위원 {random.choice(judge_list)}입니다.'))
     time.sleep(1)
     print(art.judge_msg_box.format('흠.. 오호.. 그렇구나...'))
     time.sleep(1)
-    print(art.judge_msg_box.format(f'총 점수는 {user_info['total_score']}입니다.'))
-    
-    # 150
-    # 100 ~ 149
-    if user_info['total_score'] >= 150 :
+    print(art.judge_msg_box.format(f"총 점수는 {user_info['total_score']}입니다."))
+
+    if user_info['total_score'] >= best:
         print(art.judge_face4)
         print(art.judge_msg_box.format('?!'))
         time.sleep(1)
         print(art.judge_msg_box.format('우오오!!!'))
         time.sleep(1)
         print(art.judge_msg_box.format('너무 맛있습니다!!!❤️❤️❤️❤️❤️❤️❤️❤️❤️'))
-    elif 100 <= user_info['total_score'] <= 149 :
+    elif good <= user_info['total_score'] < best:
         print(art.judge_face2)
-        print(art.judge_msg_box.format('으.. 토가 나올것만 같군요'))
-    else :
+        print(art.judge_msg_box.format('음… 나쁘진 않은데요. (씹다가 현타)'))
+    else:
         print(art.judge_face3)
         print(art.judge_msg_box.format("제 인생 최악의 만두입니다. 으어어어어얽."))
+    time.sleep(2)
 
 
 def choice_step(step_num) :
@@ -220,27 +227,36 @@ def seasoning_score_calc() :
     time.sleep(1)
 
 def chopping_step() :
-    print('이제 선택한 재료들을 다져볼게요!')
+    print('\n\n이제 선택한 재료들을 다져볼게요!')
     print('3초동안 키보드에서 아무 문자를 입력해서 재료를 다져주세요!')
+    print("\n\n⚠⚠⚠ 영문 키보드 상태에서 입력하세요 ⚠⚠⚠")
     input('엔터를 누르면 시작됩니다!')
     
-    start_time = datetime.datetime.now()
-    seconds_to_run = 3
-    second = 3
-    
-    chepping_str = ''
-    while (datetime.datetime.now() - start_time).seconds < seconds_to_run:
-        ch = msvcrt.getch().decode('utf-8')
-        chepping_str += ch
-    
-    count = len(chepping_str)
+    count = 0
+    start = time.time()
+    limit = 3  # 3초
+
+    print('\n다져주세요!!!')
+    while time.time() - start < limit:
+        if msvcrt.kbhit():          # 키가 눌렸는지 확인
+            msvcrt.getch()          # 눌린 키 하나 가져오기
+            count += 1
     print(f'총 {count}번 다지셨네요!')
-    # best : 200자
-    #     점수 : 100
-    # good : 150자 ~ 199자
-    #     점수 : 50
-    # not_good : 149자 이하
-    #     점수 : 10
+    
+    time.sleep(1.5)
+    
+    if count >= 80 :
+        print('\n축하합니다!! 완벽하게 다져졌어요!🍴')
+        user_info['step_3_score'] += 100
+    elif 50 <= count <= 79 :
+        print('\n보통정도로 다져졌네요.🍴')
+        user_info['step_3_score'] += 50
+    else :
+        print('\n흠... 재료가 다 안 다져진거 같은데요.. 🤔')
+        user_info['step_3_score'] -= 10
+    
+    time.sleep(1)
+    
     
 
 def ready_to_steam() :
@@ -254,12 +270,14 @@ def steamer() :
         print(msg)
         time.sleep(0.5)
     
-    steamer_score = random.randint(-30, 100)
+    steamer_score = random.randint(-20, 100)
     if steamer_score < 0 :
         print(f'으악 만두를 찌다가 문제가 생겼어요.. 😭 : {steamer_score}점')
     else :
         print(f'찜이 잘 돼서 보너스 포인트를 받았어요! 🥰 : +{steamer_score}점')
-    user_info['total_score'] += steamer_score
+    user_info['step_4_score'] += steamer_score
+    time.sleep(1)
+    input('만두 완성!! 이제 심사위원한테 평가를 받아볼게요.')
 
 def mode_select() :
     # 게임 시작하면 먼저 user name 받기
@@ -281,15 +299,12 @@ def game_start() :
     # 하드모드인 경우 2단계까지
     if mode == 'h' :
         choice_step(2)
-    # 키보드로 다지기 메서드 생성
-    # chopping_step()
+    # 다지기
+    chopping_step()
     ready_to_steam()
+    # 찌기
     steamer()
-    time.sleep(1)
-    print('만두 완성!! 이제 심사위원한테 평가를 받아볼게요.')
     judge_mandu()
-    
-    time.sleep(2)
     game_done()
     show_ranking()
     
